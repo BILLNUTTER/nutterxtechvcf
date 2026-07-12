@@ -1,45 +1,64 @@
-# [Project name]
+# Nutterx Technologies VCF Registration
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A production-ready web application that lets users register their phone number and download the official Nutterx Technologies VCF contact card.
 
 ## Run & Operate
 
-- `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
+- `pnpm --filter @workspace/vcf-registration run dev` — run the frontend (React + Vite)
+- `pnpm --filter @workspace/api-server run dev` — run the API server (Express)
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only; run after providing DATABASE_URL)
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
+- Frontend: React 19, Vite, Tailwind CSS v4, TanStack Query, Wouter
+- API: Express 5, express-session, helmet, express-rate-limit
+- DB: PostgreSQL + Drizzle ORM + drizzle-zod
+- Validation: Zod (zod/v4)
 - API codegen: Orval (from OpenAPI spec)
 - Build: esbuild (CJS bundle)
 
+## Environment Variables
+
+| Variable | Required | Description |
+|---|---|---|
+| `DATABASE_URL` | ✅ | PostgreSQL connection string (your Supabase URL) |
+| `SESSION_SECRET` | ✅ | Secret key for express-session cookie signing |
+| `ADMIN_USERNAME` | ✅ | Admin panel login username |
+| `ADMIN_PASSWORD` | ✅ | Admin panel login password |
+
+Set these in Replit's Secrets panel. After setting DATABASE_URL, run `pnpm --filter @workspace/db run push` to create the tables.
+
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `lib/api-spec/openapi.yaml` — source of truth for all API contracts
+- `lib/db/src/schema/registrations.ts` — registrations table (id, name, phone unique, created_at)
+- `lib/db/src/schema/settings.ts` — VCF company settings table
+- `artifacts/api-server/src/routes/` — Express route handlers
+- `artifacts/api-server/src/routes/admin.ts` — all admin endpoints (auth, registrations, settings)
+- `artifacts/api-server/src/routes/register.ts` — public registration endpoint (rate-limited)
+- `artifacts/api-server/src/routes/vcf.ts` — VCF file generation and download
+- `artifacts/vcf-registration/src/` — React frontend
+
+## Features
+
+- **Registration form** — Full Name + Phone (E.164 format enforced, spaces stripped, unique constraint)
+- **VCF download** — Downloads NUTTERX.vcf generated from admin-configurable company settings
+- **Admin panel** — `/admin` route, session-based auth, total count, search, delete, export CSV, settings editor
+- **Security** — Helmet headers, CORS, rate limiting (10 req/15min on /register), input validation with Zod, parameterized queries via Drizzle ORM
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
-
-## Product
-
-_Describe the high-level user-facing capabilities of this app once they exist._
+- Session-based auth for admin (not JWT) — simpler, no token refresh complexity for a single-admin use case
+- Drizzle ORM prevents SQL injection by design — all queries parameterized
+- Settings stored in DB (single row) so VCF content can be updated without redeployment
+- `/admin/registrations/export` registered before `/:id` to prevent "export" being matched as an ID param
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
-
-## Gotchas
-
-_Populate as you build — sharp edges, "always run X before Y" rules._
-
-## Pointers
-
-- See the `pnpm-workspace` skill for workspace structure, TypeScript setup, and package details
+- DATABASE_URL will be provided by the user (their own Supabase PostgreSQL URL)
+- Do NOT create or generate a database URL
+- All secrets via environment variables only

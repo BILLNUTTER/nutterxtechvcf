@@ -1,0 +1,190 @@
+Build a complete production-ready web application called **Nutterx Technologies VCF Registration**.
+
+Tech Stack:
+- React + Vite + TypeScript
+- Tailwind CSS
+- Express.js backend
+- PostgreSQL (Supabase)
+- Drizzle ORM
+- Deployable on Vercel
+
+IMPORTANT:
+Do NOT create a new Supabase project or database.
+Do NOT generate a database URL.
+I will provide my own Supabase PostgreSQL Database URL later.
+Configure the application to read the database connection from the environment variable:
+
+DATABASE_URL
+
+The project must work immediately after I paste my own DATABASE_URL into the environment variables.
+
+──────────────────────────────
+
+HOME PAGE
+
+Create a modern, professional, mobile-friendly landing page.
+
+Title:
+Nutterx Technologies
+
+Subtitle:
+VCF Registration
+
+Description:
+Register your phone number to download the official Nutterx Technologies contact card.
+
+──────────────────────────────
+
+REGISTRATION FORM
+
+Fields:
+- Full Name (required)
+- Phone Number (required)
+
+Phone Number Rules:
+- Country code is mandatory.
+- Accept only E.164 format.
+- Examples:
++254712345678
++2557XXXXXXXX
++2567XXXXXXXX
+- Reject numbers without country code.
+- Automatically remove spaces.
+- Store numbers exactly in E.164 format.
+
+Every phone number must be UNIQUE.
+
+No duplicate registrations should ever be allowed.
+
+Display:
+
+"This phone number is already registered."
+
+──────────────────────────────
+
+DATABASE
+
+Use Supabase PostgreSQL.
+
+Read connection from:
+
+DATABASE_URL
+
+Create table:
+
+registrations
+
+Columns:
+
+id
+name
+phone
+created_at
+
+phone must have a UNIQUE constraint.
+
+Automatically create the table if it doesn't exist.
+
+──────────────────────────────
+
+AFTER SUCCESSFUL REGISTRATION
+
+Display:
+
+Registration Successful
+
+Thank you for registering with Nutterx Technologies.
+
+Large button:
+
+Download VCF
+
+The downloaded file name must always be:
+
+NUTTERX.vcf
+
+The VCF content should contain the company contact details configured in the admin panel.
+
+──────────────────────────────
+
+ADMIN PANEL
+
+Create secure admin login using environment variables:
+
+ADMIN_USERNAME
+ADMIN_PASSWORD
+SESSION_SECRET
+
+Dashboard features:
+
+- Total registrations
+- Search registrations
+- Delete registration
+- Export CSV
+- View latest registrations
+- Update company information used inside the VCF file
+
+──────────────────────────────
+
+API
+
+POST /api/register
+
+GET /api/admin/registrations
+
+DELETE /api/admin/registrations/:id
+
+GET /api/download-vcf
+
+GET /api/admin/settings
+
+PUT /api/admin/settings
+
+──────────────────────────────
+
+SECURITY
+
+- Validate all inputs.
+- Prevent SQL injection.
+- Enable Helmet.
+- Enable CORS.
+- Rate limit registration endpoint.
+- Proper error handling.
+
+──────────────────────────────
+
+UI
+
+Create a premium UI using Tailwind CSS.
+
+Use:
+- Glassmorphism cards
+- Smooth animations
+- Responsive layout
+- Loading indicators
+- Toast notifications
+- Dark mode support
+
+──────────────────────────────
+
+DEPLOYMENT
+
+The project must be optimized for deployment on Vercel.
+
+Do NOT hardcode any secrets.
+
+Use environment variables only:
+
+DATABASE_URL
+ADMIN_USERNAME
+ADMIN_PASSWORD
+SESSION_SECRET
+
+Provide a README.md explaining:
+- How to install dependencies.
+- How to add the DATABASE_URL environment variable.
+- How to run locally.
+- How to deploy to Vercel.
+- How to configure environment variables on Vercel.
+
+Generate clean, modular, production-ready TypeScript code with proper folder structure and comments.
