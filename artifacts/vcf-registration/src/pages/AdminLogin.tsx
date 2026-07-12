@@ -1,8 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { useAdminLogin } from "@workspace/api-client-react";
+import { useAdminLogin, getGetAdminMeQueryKey } from "@workspace/api-client-react";
 import { useLocation } from "wouter";
+import { useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +26,7 @@ const loginSchema = z.object({
 export default function AdminLogin() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const adminLogin = useAdminLogin();
 
   const form = useForm<z.infer<typeof loginSchema>>({
@@ -37,14 +39,16 @@ export default function AdminLogin() {
 
   function onSubmit(values: z.infer<typeof loginSchema>) {
     adminLogin.mutate({ data: values }, {
-      onSuccess: () => {
+      onSuccess: async () => {
+        // Invalidate the cached /admin/me result so AdminView sees the new session
+        await queryClient.invalidateQueries({ queryKey: getGetAdminMeQueryKey() });
         setLocation("/?admin=true");
       },
-      onError: (error) => {
+      onError: () => {
         toast({
           variant: "destructive",
           title: "Login Failed",
-          description: "Invalid credentials",
+          description: "Invalid credentials. Please try again.",
         });
       }
     });

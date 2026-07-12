@@ -1,0 +1,14 @@
+{
+  "buildCommand": "pnpm install --frozen-lockfile && pnpm --filter @workspace/vcf-registration run build",
+  "outputDirectory": "artifacts/vcf-registration/dist",
+  "framework": null,
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/index" }
+  ],
+  "functions": {
+    "api/index.ts": {
+      "memory": 512,
+      "maxDuration": 15
+    }
+  }
+}

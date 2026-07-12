@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -31,7 +31,8 @@ import {
   Trash2,
   Users,
   Settings as SettingsIcon,
-  Building2
+  Building2,
+  Target,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -71,6 +72,7 @@ const settingsSchema = z.object({
   email: z.string().email("Invalid email"),
   website: z.string().url("Invalid URL"),
   address: z.string().min(1, "Address is required"),
+  registrationTarget: z.coerce.number().int().min(1, "Target must be at least 1"),
 });
 
 export default function AdminDashboard() {
@@ -86,7 +88,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(search);
-      setPage(1); // Reset to page 1 on new search
+      setPage(1);
     }, 500);
     return () => clearTimeout(timer);
   }, [search]);
@@ -109,7 +111,10 @@ export default function AdminDashboard() {
   
   const handleLogout = () => {
     logout.mutate(undefined, {
-      onSuccess: () => setLocation("/?admin=true")
+      onSuccess: async () => {
+        await queryClient.invalidateQueries({ queryKey: getGetAdminMeQueryKey() });
+        setLocation("/?admin=true");
+      }
     });
   };
 
@@ -149,6 +154,7 @@ export default function AdminDashboard() {
       email: "",
       website: "",
       address: "",
+      registrationTarget: 500,
     },
   });
 
@@ -161,6 +167,7 @@ export default function AdminDashboard() {
         email: settingsData.email,
         website: settingsData.website,
         address: settingsData.address,
+        registrationTarget: settingsData.registrationTarget,
       });
     }
   }, [settingsData, form]);
@@ -356,7 +363,7 @@ export default function AdminDashboard() {
               <CardHeader>
                 <CardTitle>VCF Contact Details</CardTitle>
                 <CardDescription>
-                  This information will be included in the downloaded VCF card when users register.
+                  Configure the information embedded in the downloadable VCF card, and set the registration target.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -369,6 +376,35 @@ export default function AdminDashboard() {
                 ) : (
                   <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSettingsSubmit)} className="space-y-4">
+
+                      {/* Registration target — prominent at the top */}
+                      <div className="rounded-lg border border-primary/20 bg-primary/5 p-4 space-y-3">
+                        <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                          <Target className="w-4 h-4 text-primary" />
+                          Registration Target
+                        </div>
+                        <FormField
+                          control={form.control}
+                          name="registrationTarget"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="text-xs text-muted-foreground">
+                                Number of registrations required to unlock the VCF download
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  type="number"
+                                  min="1"
+                                  className="bg-background/50 font-mono"
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+
                       <FormField
                         control={form.control}
                         name="companyName"

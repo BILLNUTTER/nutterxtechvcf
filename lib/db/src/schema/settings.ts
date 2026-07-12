@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -10,6 +10,7 @@ export const settingsTable = pgTable("settings", {
   email: text("email").notNull().default(""),
   website: text("website").notNull().default(""),
   address: text("address").notNull().default(""),
+  registrationTarget: integer("registration_target").notNull().default(500),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 

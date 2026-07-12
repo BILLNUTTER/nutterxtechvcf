@@ -17,12 +17,22 @@ import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { Download, Building2, Users, Trophy } from "lucide-react";
 
-const WHATSAPP_URL = "https://chat.whatsapp.com/JsKmQMpECJMHyxucHquF15?s=cl&p=a&mlu=0&amv=1";
-const TARGET = 500;
+const WHATSAPP_URL =
+  "https://chat.whatsapp.com/JsKmQMpECJMHyxucHquF15?s=cl&p=a&mlu=0&amv=1";
+
+/** Normalise user input to E.164: strip spaces + leading +, then re-add + */
+function normalizePhone(raw: string): string {
+  return "+" + raw.replace(/\s+/g, "").replace(/^\+/, "");
+}
 
 const formSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters."),
-  phone: z.string().regex(/^\+[1-9]\d{6,14}$/, "Must be in E.164 format (e.g. +254712345678)"),
+  phone: z
+    .string()
+    .regex(
+      /^\+?[1-9]\d{6,14}$/,
+      "Enter your number with country code, no spaces (e.g. 254712345678)"
+    ),
 });
 
 export default function Home() {
@@ -34,8 +44,9 @@ export default function Home() {
   });
 
   const count = countData?.count ?? 0;
-  const progress = Math.min((count / TARGET) * 100, 100);
-  const targetReached = count >= TARGET;
+  const target = countData?.target ?? 500;
+  const progress = Math.min((count / target) * 100, 100);
+  const targetReached = count >= target;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -43,14 +54,13 @@ export default function Home() {
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const phone = values.phone.replace(/\s+/g, "");
+    const phone = normalizePhone(values.phone);
 
     submitRegistration.mutate(
       { data: { name: values.name, phone } },
       {
         onSuccess: () => {
           refetchCount();
-          // Immediately redirect to the WhatsApp group
           window.location.href = WHATSAPP_URL;
         },
         onError: (error) => {
@@ -64,7 +74,8 @@ export default function Home() {
               variant: "destructive",
               title: "Registration Failed",
               description:
-                error.data?.message || "An unexpected error occurred. Please try again.",
+                error.data?.message ||
+                "An unexpected error occurred. Please try again.",
             });
           }
         },
@@ -74,7 +85,7 @@ export default function Home() {
 
   return (
     <div className="min-h-[100dvh] flex flex-col items-center justify-center p-4 relative overflow-hidden bg-background">
-      {/* Ambient background glows */}
+      {/* Ambient glows */}
       <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px] pointer-events-none" />
       <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px] pointer-events-none" />
 
@@ -99,14 +110,11 @@ export default function Home() {
                 Community Progress
               </div>
               <div className="text-sm font-mono font-bold text-primary">
-                {count.toLocaleString()} / {TARGET.toLocaleString()}
+                {count.toLocaleString()} / {target.toLocaleString()}
               </div>
             </div>
 
-            <Progress
-              value={progress}
-              className="h-3 rounded-full bg-white/5"
-            />
+            <Progress value={progress} className="h-3 rounded-full bg-white/5" />
 
             <div className="mt-3 text-center">
               {targetReached ? (
@@ -117,16 +125,17 @@ export default function Home() {
               ) : (
                 <p className="text-sm text-muted-foreground">
                   <span className="font-semibold text-foreground">
-                    {(TARGET - count).toLocaleString()}
+                    {(target - count).toLocaleString()}
                   </span>{" "}
-                  more {TARGET - count === 1 ? "registration" : "registrations"} to unlock the VCF download
+                  more {target - count === 1 ? "registration" : "registrations"} to
+                  unlock the VCF download
                 </p>
               )}
             </div>
           </CardContent>
         </Card>
 
-        {/* VCF Download — only unlocked after target is reached */}
+        {/* VCF Download — unlocked when target reached */}
         {targetReached && (
           <Button
             asChild
@@ -145,7 +154,8 @@ export default function Home() {
           <CardHeader>
             <CardTitle className="text-xl">Join the Network</CardTitle>
             <CardDescription>
-              Register your phone number to join our WhatsApp community and unlock the contact card.
+              Register your phone number to join our WhatsApp community and unlock the
+              contact card.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -176,11 +186,15 @@ export default function Home() {
                       <FormLabel>Phone Number</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="+254712345678"
+                          placeholder="254712345678"
+                          inputMode="numeric"
                           className="bg-background/50 h-11"
                           {...field}
                         />
                       </FormControl>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Include country code, no spaces or + sign (e.g. 254712345678)
+                      </p>
                       <FormMessage />
                     </FormItem>
                   )}

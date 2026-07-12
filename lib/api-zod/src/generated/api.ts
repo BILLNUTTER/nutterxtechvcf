@@ -43,7 +43,8 @@ export const SubmitRegistrationResponse = zod.object({
  * @summary Get total registration count
  */
 export const GetCountResponse = zod.object({
-  "count": zod.number()
+  "count": zod.number(),
+  "target": zod.number()
 })
 
 
@@ -137,6 +138,7 @@ export const GetSettingsResponse = zod.object({
   "email": zod.string(),
   "website": zod.string(),
   "address": zod.string(),
+  "registrationTarget": zod.number().describe('Number of registrations required to unlock VCF download'),
   "updatedAt": zod.coerce.date()
 })
 
@@ -144,13 +146,17 @@ export const GetSettingsResponse = zod.object({
 /**
  * @summary Update company settings for VCF
  */
+
+
+
 export const UpdateSettingsBody = zod.object({
   "companyName": zod.string(),
   "title": zod.string(),
   "phone": zod.string(),
   "email": zod.string(),
   "website": zod.string(),
-  "address": zod.string()
+  "address": zod.string(),
+  "registrationTarget": zod.number().min(1)
 })
 
 export const UpdateSettingsResponse = zod.object({
@@ -161,6 +167,7 @@ export const UpdateSettingsResponse = zod.object({
   "email": zod.string(),
   "website": zod.string(),
   "address": zod.string(),
+  "registrationTarget": zod.number().describe('Number of registrations required to unlock VCF download'),
   "updatedAt": zod.coerce.date()
 })
 

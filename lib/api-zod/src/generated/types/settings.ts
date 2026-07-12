@@ -14,5 +14,7 @@ export interface Settings {
   email: string;
   website: string;
   address: string;
+  /** Number of registrations required to unlock VCF download */
+  registrationTarget: number;
   updatedAt: Date;
 }

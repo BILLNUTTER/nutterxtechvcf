@@ -360,6 +360,9 @@ components:
           type: string
         address:
           type: string
+        registrationTarget:
+          type: integer
+          description: Number of registrations required to unlock VCF download
         updatedAt:
           type: string
           format: date-time
@@ -371,6 +374,7 @@ components:
         - email
         - website
         - address
+        - registrationTarget
         - updatedAt
 
     SettingsInput:
@@ -388,6 +392,9 @@ components:
           type: string
         address:
           type: string
+        registrationTarget:
+          type: integer
+          minimum: 1
       required:
         - companyName
         - title
@@ -395,14 +402,18 @@ components:
         - email
         - website
         - address
+        - registrationTarget
 
     CountResponse:
       type: object
       properties:
         count:
           type: integer
+        target:
+          type: integer
       required:
         - count
+        - target
 
     AdminLoginInput:
       type: object

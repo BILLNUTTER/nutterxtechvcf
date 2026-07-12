@@ -8,4 +8,5 @@
 
 export interface CountResponse {
   count: number;
+  target: number;
 }

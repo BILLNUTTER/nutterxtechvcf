@@ -13,4 +13,6 @@ export interface SettingsInput {
   email: string;
   website: string;
   address: string;
+  /** @minimum 1 */
+  registrationTarget: number;
 }

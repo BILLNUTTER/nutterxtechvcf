@@ -41,6 +41,8 @@ export interface Settings {
   email: string;
   website: string;
   address: string;
+  /** Number of registrations required to unlock VCF download */
+  registrationTarget: number;
   updatedAt: string;
 }
 
@@ -51,10 +53,13 @@ export interface SettingsInput {
   email: string;
   website: string;
   address: string;
+  /** @minimum 1 */
+  registrationTarget: number;
 }
 
 export interface CountResponse {
   count: number;
+  target: number;
 }
 
 export interface AdminLoginInput {
