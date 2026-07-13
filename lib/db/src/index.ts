@@ -10,7 +10,14 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const dbUrl = process.env.DATABASE_URL;
+
+export const pool = new Pool({
+  connectionString: dbUrl,
+  // Supabase (and most managed Postgres hosts) require SSL on port 5432.
+  // rejectUnauthorized:false accepts self-signed certs used by Supabase.
+  ssl: dbUrl?.includes("supabase.co") ? { rejectUnauthorized: false } : undefined,
+});
 export const db = drizzle(pool, { schema });
 
 export * from "./schema";
