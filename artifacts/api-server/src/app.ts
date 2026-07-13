@@ -87,12 +87,16 @@ app.use(
 
 app.use("/api", router);
 
-// Auto-migrate: create tables if they don't exist yet.
-// Runs once per cold start — all statements are idempotent (IF NOT EXISTS).
+// Top-level await: block module load until tables exist.
+// Because the bundle is ESM, Vercel won't serve any request until this
+// resolves — eliminates the race between cold-start and first request.
 if (databaseUrl) {
-  ensureSchema(databaseUrl)
-    .then(() => logger.info("Schema bootstrap complete"))
-    .catch((err) => logger.error({ err }, "Schema bootstrap failed — check DATABASE_URL"));
+  try {
+    await ensureSchema(databaseUrl);
+    logger.info("Schema bootstrap complete");
+  } catch (err) {
+    logger.error({ err }, "Schema bootstrap failed — check DATABASE_URL and SSL settings");
+  }
 }
 
 export default app;
